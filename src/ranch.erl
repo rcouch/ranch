@@ -20,6 +20,7 @@
 -export([accept_ack/1]).
 -export([remove_connection/1]).
 -export([get_port/1]).
+-export([unlink_connection/1]).
 -export([get_max_connections/1]).
 -export([set_max_connections/2]).
 -export([get_protocol_options/1]).
@@ -101,6 +102,15 @@ remove_connection(Ref) ->
 -spec get_port(ref()) -> inet:port_number().
 get_port(Ref) ->
 	ranch_server:get_port(Ref).
+
+%% @doc Unlink and Remove the calling process' connection from the pool.
+%%
+%% Useful if you want to monitor differently a connection
+-spec unlink_connection(ref()) -> ok.
+unlink_connection(Ref) ->
+	ConnsSup = ranch_server:get_connections_sup(Ref),
+    ConnsSup ! {unlink_connection, Ref, self()},
+	ok.
 
 -spec get_max_connections(ref()) -> max_conns().
 get_max_connections(Ref) ->
